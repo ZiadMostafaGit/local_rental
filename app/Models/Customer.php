@@ -53,8 +53,12 @@ public function setGenderAttribute($value)
     }
 }
 
-
-
+public function items()
+{
+    return $this->belongsToMany(Item::class, 'rents')
+                ->withPivot('rented_time', 'start_date', 'end_date', 'delivery_address', 'payment_token')
+                ->withTimestamps();
+}
 public function incrementScore($amount = 10)
 {
     // زيادة الـ score بمقدار معين، يمكن أن يكون القيمة الافتراضية 10

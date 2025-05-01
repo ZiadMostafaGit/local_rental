@@ -5,7 +5,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ItemImageController;
-
+use App\Http\Controllers\RentController;
+use App\Models\Rent;
 
 /*
 |--------------------------------------------------------------------------
@@ -48,6 +49,26 @@ Route::get('/items/{item}/images', [ItemImageController::class, 'index'])->name(
 Route::view('/example-auth','example-auth');
 
 Route::get('/admin/dashboard', [DashboardController::class, 'index']);
+
+
+Route::get('/rent/create', [RentController::class, 'create'])->name('rent.form');
+Route::post('/rent', [RentController::class, 'store'])->name('rent.store');
+
+// صفحة الدفع المؤقتة (تشغل الجافاسكربت لبدء جلسة Stripe)
+Route::get('/rent/payment', [RentController::class, 'payment'])->name('rent.payment');
+
+// Session Stripe
+Route::post('/rent/session', [RentController::class, 'session'])->name('rent.payment.session');
+
+// نجاح الدفع
+Route::get('/rent/callback/{id}', [RentController::class, 'callback'])->name('callback');
+Route::get('/home', function () {
+    return 'Payment Success';
+})->name('home');
+// فشل الدفع
+Route::get('/rent/error', function () {
+    return 'Payment Failed';
+})->name('error');
 
 
 require __DIR__.'/auth.php';
