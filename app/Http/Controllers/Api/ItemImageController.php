@@ -1,5 +1,5 @@
 <?php
-namespace App\Http\Controllers\Api\Auth;
+namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 
 use App\Models\Item;
@@ -75,6 +75,6 @@ class ItemImageController extends Controller
             'message' => 'Images uploaded successfully.',
             'images' => $savedImages
         ]);
-    } 
+    }
 
 }

@@ -44,8 +44,8 @@ class RentController extends Controller
      */
     public function store(Request $request)
     {
-        $customerid = 6;
-        $itemid = 4;
+        $customerid = 8;
+        $itemid = 5;
 
         $customer = Customer::find($customerid);
         $item = Item::find($itemid);
@@ -60,6 +60,18 @@ class RentController extends Controller
             'delivery_address' => 'required|string|max:100',
         ]);
 
+        // التحقق مما إذا كان العنصر غير متاح خلال الفترة الزمنية
+        $existingRent = Rent::where('item_id', $itemid)
+            ->where(function ($query) use ($request) {
+                $query->whereBetween('start_date', [$request->start_date, $request->end_date])
+                    ->orWhereBetween('end_date', [$request->start_date, $request->end_date]);
+            })
+            ->exists();
+
+        if ($existingRent) {
+            return redirect()->route('rent.form')->withErrors(['error' => 'Item is unavailable during the selected period']);
+        }
+
         $rent = Rent::create([
             'customer_id' => $customerid,
             'item_id' => $itemid,
@@ -67,6 +79,8 @@ class RentController extends Controller
             'end_date' => $request->end_date,
             'delivery_address' => $request->delivery_address,
         ]);
+        // تحديث حالة العنصر إلى 'unavailable'
+        $item->update(['item_status' => 'unavailable']);
 
         return view('rent.payment', [
             'item' => $item,
@@ -150,7 +164,6 @@ class RentController extends Controller
             $rent->save();
 
             return response()->json(['id' => $checkout_session->id]);
-
         } catch (\Exception $e) {
             Log::debug('Error in Stripe session creation: ' . $e->getMessage());
             return response()->json(['error' => $e->getMessage()], 500);
@@ -174,11 +187,16 @@ class RentController extends Controller
         if ($rental) {
             $rental->payment_token = $session->id;
             $rental->save();
+            // زيادة score للعميل بمقدار 10
+            $customer = $rental->customer;
+            if ($customer) {
+                $customer->incrementScore(); // أو $customer->increment('score', 10);
+            }
         } else {
             return redirect()->route('home')->with('error', 'Rental not found.');
         }
 
-        return view('rent.success', compact('rental'));
+        return view('rent.success', compact('rental'))->with('score', $customer->score ?? 0);
     }
 
 

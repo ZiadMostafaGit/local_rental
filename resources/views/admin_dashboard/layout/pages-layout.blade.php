@@ -73,7 +73,7 @@
 				></div>
 				<div class="header-search">
 					<form>
-						<div class="form-group mb-0">
+						<div class="mb-0 form-group">
 							<i class="dw dw-search2 search-icon"></i>
 							<input
 								type="text"
@@ -232,24 +232,19 @@
 							<span class="user-icon">
 								<img src="/back/vendors/images/photo1.jpg" alt="" />
 							</span>
-							<span class="user-name">Ross C. Lopez</span>
+							<span class="user-name">{{ Auth::user()->name }}</span>
 						</a>
-						<div
-							class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list"
-						>
-							<a class="dropdown-item" href="profile.html"
-								><i class="dw dw-user1"></i> Profile</a
-							>
-							<a class="dropdown-item" href="profile.html"
-								><i class="dw dw-settings2"></i> Setting</a
-							>
-							<a class="dropdown-item" href="faq.html"
-								><i class="dw dw-help"></i> Help</a
-							>
-							<a class="dropdown-item" href="login.html"
-								><i class="dw dw-logout"></i> Log Out</a
-							>
-						</div>
+						<div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
+                            <a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="dw dw-user1"></i>
+                                {{ __('Profile') }}</a>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <a class="dropdown-item" href="{{ route('logout') }}"
+                                    onclick="event.preventDefault();
+                                                    this.closest('form').submit();">
+                                    <i class="dw dw-logout"></i> {{ __('Log Out') }}</a>
+                            </form>
+                        </div>
 					</div>
 				</div>
 				
@@ -270,8 +265,8 @@
 			</div>
 			<div class="right-sidebar-body customscroll">
 				<div class="right-sidebar-body-content">
-					<h4 class="weight-600 font-18 pb-10">Header Background</h4>
-					<div class="sidebar-btn-group pb-30 mb-10">
+					<h4 class="pb-10 weight-600 font-18">Header Background</h4>
+					<div class="mb-10 sidebar-btn-group pb-30">
 						<a
 							href="javascript:void(0);"
 							class="btn btn-outline-primary header-white active"
@@ -284,8 +279,8 @@
 						>
 					</div>
 
-					<h4 class="weight-600 font-18 pb-10">Sidebar Background</h4>
-					<div class="sidebar-btn-group pb-30 mb-10">
+					<h4 class="pb-10 weight-600 font-18">Sidebar Background</h4>
+					<div class="mb-10 sidebar-btn-group pb-30">
 						<a
 							href="javascript:void(0);"
 							class="btn btn-outline-primary sidebar-light"
@@ -298,8 +293,8 @@
 						>
 					</div>
 
-					<h4 class="weight-600 font-18 pb-10">Menu Dropdown Icon</h4>
-					<div class="sidebar-radio-group pb-10 mb-10">
+					<h4 class="pb-10 weight-600 font-18">Menu Dropdown Icon</h4>
+					<div class="pb-10 mb-10 sidebar-radio-group">
 						<div class="custom-control custom-radio custom-control-inline">
 							<input
 								type="radio"
@@ -339,8 +334,8 @@
 						</div>
 					</div>
 
-					<h4 class="weight-600 font-18 pb-10">Menu List Icon</h4>
-					<div class="sidebar-radio-group pb-30 mb-10">
+					<h4 class="pb-10 weight-600 font-18">Menu List Icon</h4>
+					<div class="mb-10 sidebar-radio-group pb-30">
 						<div class="custom-control custom-radio custom-control-inline">
 							<input
 								type="radio"
@@ -417,7 +412,7 @@
 						</div>
 					</div>
 
-					<div class="reset-options pt-30 text-center">
+					<div class="text-center reset-options pt-30">
 						<button class="btn btn-danger" id="reset-settings">
 							Reset Settings
 						</button>
@@ -665,11 +660,11 @@
 		<div class="main-container">
 			<div class="pd-ltr-20 xs-pd-20-10">
 				<div class="min-height-200px">
-					<div class="pd-20 bg-white border-radius-4 box-shadow mb-30">
+					<div class="bg-white pd-20 border-radius-4 box-shadow mb-30">
                         @yield('content')
                     </div>
 				</div>
-				<div class="footer-wrap pd-20 mb-20 card-box">
+				<div class="mb-20 footer-wrap pd-20 card-box">
 					DeskApp - Bootstrap 4 Admin Template By
 					<a href="https://github.com/dropways" target="_blank"
 						>Ankit Hingarajiya</a

@@ -63,12 +63,20 @@ Route::post('/rent/session', [RentController::class, 'session'])->name('rent.pay
 // نجاح الدفع
 Route::get('/rent/callback/{id}', [RentController::class, 'callback'])->name('callback');
 Route::get('/home', function () {
-    return 'Payment Success';
+    return view('home');
 })->name('home');
 // فشل الدفع
 Route::get('/rent/error', function () {
     return 'Payment Failed';
 })->name('error');
 
+Route::get('/gettotalitem',[DashboardController::class,'gettotalitem'])->name('gettotalitem');
+Route::get('/gettotalcategory',[DashboardController::class,'gettotalcategory'])->name('gettotalcategory');
+Route::get('/gettotallender',[DashboardController::class,'gettotallender'])->name('gettotallender');
+Route::get('/gettotalcustomer',[DashboardController::class,'gettotalcustomer'])->name('gettotalcustomer');
+
+Route::get('/admin/rents/chart', [DashboardController::class, 'getAllRentsChart'])->name('rents.chart');
+
+Route::get('/admin/reviews/item/chart', [DashboardController::class, 'getReviewsByItemChart'])->name('reviews.item.chart');
 
 require __DIR__.'/auth.php';

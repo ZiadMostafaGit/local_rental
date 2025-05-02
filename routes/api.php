@@ -1,7 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\CustomerController;
-use App\Http\Controllers\Api\Auth\ItemImageController;
+use App\Http\Controllers\Api\ItemImageController;
+use App\Http\Controllers\Api\RentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,3 +29,12 @@ Route::post('/login-customer', [CustomerController::class, 'login']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [CustomerController::class, 'logout']);
 });
+
+
+Route::middleware('auth:customer')->prefix('rent')->group(function () {
+    Route::post('/', [RentController::class, 'store']);
+    Route::post('/session', [RentController::class, 'session']);
+    Route::get('/callback/{id}', [RentController::class, 'callback'])->name('api.rent.callback');
+    Route::get('/error', [RentController::class, 'error'])->name('api.rent.error');
+});
+

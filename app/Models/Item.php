@@ -10,6 +10,8 @@ class Item extends Model
     use HasFactory;
 
     protected $guarded = ['id'];
+    public $timestamps = false;
+
 
     // علاقة مع الصور
     public function images()
@@ -36,4 +38,10 @@ class Item extends Model
     {
         return $this->belongsTo(Lender::class, 'lender_id');
     }
+
+    public function categories()
+{
+    return $this->belongsToMany(Category::class, 'item_in_category', 'item_id', 'category_id');
+}
+
 }
