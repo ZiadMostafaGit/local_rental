@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\Auth\CustomerController;
+use App\Http\Controllers\Api\Auth\LenderController;
+use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ItemImageController;
 use App\Http\Controllers\Api\RentController;
 use Illuminate\Http\Request;
@@ -31,10 +33,27 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 
+
+
 Route::middleware('auth:customer')->prefix('rent')->group(function () {
+    Route::post('/request', [RentController::class, 'rentRequest']);
+    Route::get('/items/{id}', [ItemController::class, 'show']);
     Route::post('/', [RentController::class, 'store']);
     Route::post('/session', [RentController::class, 'session']);
     Route::get('/callback/{id}', [RentController::class, 'callback'])->name('api.rent.callback');
     Route::get('/error', [RentController::class, 'error'])->name('api.rent.error');
 });
+
+    Route::post('/register-lender', [LenderController::class, 'register']);
+    Route::post('/login-lender', [LenderController::class, 'login']);
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [LenderController::class, 'logout']);
+    });
+
+    Route::middleware('auth:lender')->group(function () {
+        Route::get('/requests', [LenderController::class, 'showRequests']);
+        Route::post('/requests/{id}/approve', [LenderController::class, 'approveRequest']);
+        Route::post('/requests/{id}/reject', [LenderController::class, 'rejectRequest']);
+    });
+
 

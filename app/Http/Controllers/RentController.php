@@ -17,18 +17,51 @@ class RentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+
+    public function rentrequest(Request $request)
     {
-        //
+        $request->validate([
+            'item_id' => 'required|exists:items,id',
+        ]);
+
+        $customerId = 16;
+
+        // Create rental request with "pending" status
+        Rent::create([
+            'customer_id' => $customerId,
+            'item_id' => $request->item_id,
+            'rental_status' => 'pending', // Pending approval
+        ]);
+
+        return redirect()->back()->with('success', 'Rental request sent successfully.');
+    }
+    public function approveRequest($id)
+    {
+        $rent = Rent::findOrFail($id);
+        $rent->rental_status = 'approved';
+        $rent->save();
+
+        return redirect()->route('lender.requests')->with('success', 'Request approved.');
     }
 
+    public function rejectRequest($id)
+    {
+        $rent = Rent::findOrFail($id);
+        $rent->rental_status = 'rejected';
+        $rent->save();
+
+        return redirect()->route('lender.requests')->with('error', 'Request rejected.');
+    }
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(Request $request)
     {
-        // احصل على الـ item الذي id = 3
-        $item = Item::find(3);
+        // احصل على طلب الإيجار بناءً على rent_id
+        $rent = Rent::findOrFail($request->rent_id);
+
+        // احصل على العنصر المرتبط بالطلب
+        $item = $rent->item;
 
         // تأكد من وجود الـ item
         if (!$item) {
@@ -36,7 +69,7 @@ class RentController extends Controller
         }
 
         // تمرير الـ item إلى الـ view
-        return view('rent.form', compact('item'));
+        return view('rent.form', compact('item', 'rent'));
     }
 
     /**
@@ -44,24 +77,25 @@ class RentController extends Controller
      */
     public function store(Request $request)
     {
-        $customerid = 8;
-        $itemid = 5;
-
-        $customer = Customer::find($customerid);
-        $item = Item::find($itemid);
-
-        if (!$customer || !$item) {
-            return redirect()->route('rent.form')->withErrors(['error' => 'Customer or Item not found']);
-        }
-
         $request->validate([
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'delivery_address' => 'required|string|max:100',
+            'rent_id' => 'required|exists:rents,id', // تأكد أن الطلب موجود
         ]);
 
-        // التحقق مما إذا كان العنصر غير متاح خلال الفترة الزمنية
-        $existingRent = Rent::where('item_id', $itemid)
+        $rent = Rent::findOrFail($request->rent_id);
+
+        $item = $rent->item;
+        $customer = $rent->customer;
+
+        if (!$item || !$customer) {
+            return redirect()->route('rent.form', ['rent_id' => $rent->id])->withErrors(['error' => 'Item or Customer not found']);
+        }
+
+        // تحقق من التداخل مع حجوزات أخرى
+        $existingRent = Rent::where('item_id', $item->id)
+            ->where('id', '!=', $rent->id) // تجاهل نفس الطلب
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
                     ->orWhereBetween('end_date', [$request->start_date, $request->end_date]);
@@ -69,17 +103,18 @@ class RentController extends Controller
             ->exists();
 
         if ($existingRent) {
-            return redirect()->route('rent.form')->withErrors(['error' => 'Item is unavailable during the selected period']);
+            return redirect()->route('rent.form', ['rent_id' => $rent->id])->withErrors(['error' => 'Item is unavailable during the selected period']);
         }
 
-        $rent = Rent::create([
-            'customer_id' => $customerid,
-            'item_id' => $itemid,
+        // تحديث بيانات الإيجار المعتمد
+        $rent->update([
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'delivery_address' => $request->delivery_address,
+            'rental_status' => 'in_progress', // أو أي حالة تريدها بعد إدخال البيانات
         ]);
-        // تحديث حالة العنصر إلى 'unavailable'
+
+        // تحديث حالة العنصر
         $item->update(['item_status' => 'unavailable']);
 
         return view('rent.payment', [

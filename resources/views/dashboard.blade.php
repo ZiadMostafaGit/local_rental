@@ -113,40 +113,20 @@
                                 <select id="reviewsItemSelect" class="form-control form-control-sm selectpicker">
                                     <option value="last_week">Last Week</option>
                                     <option value="last_month">Last Month</option>
-                                    <option value="last_6_month">Last 6 Month</option>
+                                    <option value="last_6_month">Last 6 Months</option>
                                     <option value="last_year">Last 1 Year</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                </div>
                 
-                <div class="col-md-8">
                     <div class="card-box height-100-p pd-20">
                         <canvas id="reviewsItemChart"></canvas>
                     </div>
                 </div>
+                
             </div>
-            <div class="card-box min-height-200px pd-20" data-bgcolor="#265ed7">
-                <div class="pb-20 text-white d-flex justify-content-between">
-                    <div class="text-white icon h1">
-                        <i class="fa fa-stethoscope" aria-hidden="true"></i>
-                    </div>
-                    <div class="text-right font-14">
-                        <div><i class="icon-copy ion-arrow-down-c"></i> 3.69%</div>
-                        <div class="font-12">Since last month</div>
-                    </div>
-                </div>
-                <div class="d-flex justify-content-between align-items-end">
-                    <div class="text-white">
-                        <div class="font-14">Surgery</div>
-                        <div class="font-24 weight-500">250</div>
-                    </div>
-                    <div class="max-width-150">
-                        <div id="surgery-chart"></div>
-                    </div>
-                </div>
-            </div>
+            
         </div>
         </div>
         <div class="row">
@@ -336,7 +316,7 @@
     // Initial chart load
     loadAdminChart();
 </script>
-
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -346,8 +326,8 @@
             fetch(`/admin/reviews/item/chart?range=${range}`)
                 .then(res => res.json())
                 .then(data => {
-                    const labels = data.map(d => d.name); // Names of the items
-                    const values = data.map(d => d.avg_rating); // Average ratings
+                    const labels = data.map(d => d.title); // Names of the items
+                    const values = data.map(d => d.highest_rating); // Highest ratings
 
                     // If the chart exists, destroy it and reinitialize
                     if (reviewsItemChart) {
@@ -390,7 +370,7 @@
                                 tooltip: {
                                     callbacks: {
                                         label: function (tooltipItem) {
-                                            return `${tooltipItem.label}: ${tooltipItem.raw} rating`;
+                                            return `${tooltipItem.label}: ${tooltipItem.raw} rating`; // Display the highest rating
                                         }
                                     }
                                 }

@@ -5,6 +5,7 @@
     <title>Rent an Item</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* نفس التنسيقات كما هي بدون تعديل */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f4f6f8;
@@ -72,17 +73,41 @@
             background-color: #0056b3;
         }
 
+        .alert {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
         .error-message {
             color: red;
             margin-top: 10px;
         }
-
     </style>
 </head>
 <body>
 
 <div class="container">
     <h2>Rent an Item</h2>
+
+    <!-- عرض رسائل النجاح أو الإعلام -->
+    @if (session('success'))
+        <div class="alert alert-success">{{ session('success') }}</div>
+    @endif
+
+    @if (session('info'))
+        <div class="alert alert-info">{{ session('info') }}</div>
+    @endif
 
     <!-- عرض رسائل الخطأ -->
     @if ($errors->any())
@@ -95,10 +120,14 @@
         </div>
     @endif
 
-   
-
     <form id="rent-form" method="POST" action="{{ route('rent.store') }}">
         @csrf
+
+        {{-- تمرير رقم الطلب المعتمد --}}
+        @if(isset($rent))
+            <input type="hidden" name="rent_id" value="{{ $rent->id }}">
+        @endif
+
         <div class="form-group">
             <label for="start_date">Start Date</label>
             <input type="date" id="start_date" name="start_date" required>
