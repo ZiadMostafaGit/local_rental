@@ -1,36 +1,41 @@
 <?php
-
 namespace App\Events;
 
+use App\Models\Rent;
 use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Foundation\Events\Dispatchable;
 
-class RentStatusUpdated
+class RentStatusUpdated implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    /**
-     * Create a new event instance.
-     */
-    public function __construct()
+    public $rent;
+
+    public function __construct(Rent $rent)
     {
-        //
+        $this->rent = $rent;
     }
 
-    /**
-     * Get the channels the event should broadcast on.
-     *
-     * @return array<int, \Illuminate\Broadcasting\Channel>
-     */
-    public function broadcastOn(): array
+    public function broadcastOn()
+    {
+        return new Channel('rent-status.' . $this->rent->customer_id);
+    }
+
+    public function broadcastWith()
     {
         return [
-            new PrivateChannel('channel-name'),
+            'id' => $this->rent->id,
+            'item_id' => $this->rent->item_id,
+            'status' => $this->rent->rental_status,
+            'item_status' => $this->rent->item->item_status,
         ];
+    }
+
+    public function broadcastAs()
+    {
+        return 'RentStatusUpdated';
     }
 }
