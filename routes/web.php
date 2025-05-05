@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ItemController as AdminItemController;
 use App\Http\Controllers\Admin\ItemImageController;
+use App\Http\Controllers\Admin\LenderController as AdminLenderController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
@@ -145,4 +146,9 @@ Route::prefix('category')->group(function () {
     Route::put('/{item}', [CategoryController::class, 'update'])->name('category.update');
     Route::delete('/{item}', [CategoryController::class, 'destroy'])->name('category.destroy');
 });
+
+Route::get('/lenders', [AdminLenderController::class, 'index'])->name('lenders.index');
+Route::get('pending', [AdminLenderController::class, 'pendingItems'])->name('admin.items.pending');           // عرض العناصر المعلقة
+Route::post('{id}/approve', [AdminLenderController::class, 'approve'])->name('admin.items.approve');   // الموافقة على عنصر
+Route::post('{id}/reject', [AdminLenderController::class, 'reject'])->name('admin.items.reject');            // رفض عنصر
 require __DIR__.'/auth.php';

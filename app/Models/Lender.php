@@ -14,7 +14,7 @@ class Lender extends Authenticatable
     protected $table = 'lenders';
     protected $guard = 'lender';
     protected $fillable = [
-        'first_name', 'last_name', 'email', 'password', 'gender', 'state', 'city', 'street', 'subscription'
+        'first_name', 'last_name', 'email', 'password', 'gender', 'state', 'city', 'street', 'score'
     ];
     /**
      * The attributes that should be hidden for serialization.

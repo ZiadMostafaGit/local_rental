@@ -28,9 +28,9 @@ class RentController extends Controller
 
         return response()->json([
             'message' => 'Rental request sent successfully.',
-            'rent' => $rent->fresh() 
+            'rent' => $rent->fresh()
         ], 201);
-        
+
     }
     public function approveRequest($id)
     {
@@ -56,22 +56,22 @@ class RentController extends Controller
     {
         $request->validate([
             'item_id' => 'required|exists:items,id',
-            'start_date' => 'required|date',
+            'start_date' => 'required|date|after_or_equal:' . today()->toDateString(),
             'end_date' => 'required|date|after_or_equal:start_date',
             'delivery_address' => 'required|string|max:100',
         ]);
-    
+
         $customer = auth('customer')->user();
         if (!$customer) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-    
+
         // البحث عن تأجير سابق تمّت الموافقة عليه
         $rent = Rent::where('customer_id', $customer->id)
                     ->where('item_id', $request->item_id)
                     ->where('rental_status', 'approved')
                     ->first();
-    
+
         // تحقق من التداخل مع حجوزات أخرى لنفس العنصر
         $overlap = Rent::where('item_id', $request->item_id)
             ->when($rent, function ($query) use ($rent) {
@@ -86,11 +86,11 @@ class RentController extends Controller
                       });
             })
             ->exists();
-    
+
         if ($overlap) {
             return response()->json(['error' => 'The item is already rented during this period.'], 422);
         }
-    
+
         if ($rent) {
             // تحديث بيانات الإيجار
             $rent->update([
@@ -99,11 +99,11 @@ class RentController extends Controller
                 'delivery_address' => $request->delivery_address,
                 'rental_status' => 'in_progress',
             ]);
-    
+
             // تحديث حالة العنصر
             $item = Item::findOrFail($request->item_id);
             $item->update(['item_status' => 'unavailable']);
-    
+
             return response()->json([
                 'message' => 'Rent updated successfully',
                 'rent' => $rent,
@@ -118,16 +118,16 @@ class RentController extends Controller
                 'delivery_address' => $request->delivery_address,
                 'rental_status' => 'pending',
             ]);
-    
+
             return response()->json([
                 'message' => 'Rent created successfully',
                 'rent' => $rent,
             ], 201);
         }
     }
-    
-    
-    
+
+
+
     // حساب المبلغ المستحق
     private function calculateAmount(Rent $rental)
     {

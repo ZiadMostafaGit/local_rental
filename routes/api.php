@@ -46,25 +46,26 @@ Route::middleware('auth:customer')->prefix('rent')->group(function () {
     Route::get('/error', [RentController::class, 'error'])->name('api.rent.error');
 });
 
-    Route::post('/register-lender', [LenderController::class, 'register']);
-    Route::post('/login-lender', [LenderController::class, 'login']);
-    Route::middleware('auth:sanctum')->group(function () {
-        Route::post('/logout', [LenderController::class, 'logout']);
-    });
+Route::post('/register-lender', [LenderController::class, 'register']);
+Route::post('/login-lender', [LenderController::class, 'login']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [LenderController::class, 'logout']);
+});
 
-    Route::middleware('auth:lender')->group(function () {
-        Route::get('/requests', [LenderController::class, 'showRequests']);
-        Route::post('/requests/{id}/approve', [LenderController::class, 'approveRequest']);
-        Route::post('/requests/{id}/reject', [LenderController::class, 'rejectRequest']);
-    });
+Route::middleware('auth:lender')->group(function () {
+    Route::get('/requests', [LenderController::class, 'showRequests']);
+    Route::post('/requests/{id}/approve', [LenderController::class, 'approveRequest']);
+    Route::post('/requests/{id}/reject', [LenderController::class, 'rejectRequest']);
+    Route::post('/items/add', [ItemController::class, 'store']);
+    Route::put('items/{id}', [ItemController::class, 'update']);
+    Route::delete('items/{id}', [ItemController::class, 'destroy']);
+});
 
 
 
-    Route::middleware('auth:customer,lender')->group(function () {
-        Route::get('/conversations/{id}', [ApiChatController::class, 'show']);
-        Route::post('/conversations/create', [ChatController::class, 'createConversation']);
-        Route::post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
-        Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
-    });
-    
-
+Route::middleware('auth:customer,lender')->group(function () {
+    Route::get('/conversations/{id}', [ApiChatController::class, 'show']);
+    Route::post('/conversations/create', [ChatController::class, 'createConversation']);
+    Route::post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
+    Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
+});

@@ -290,14 +290,14 @@
 
     <div class="left-side-bar">
         <div class="brand-logo">
-            
+
             <span class="dark-logo" style="font-size: 24px; font-weight: bold; color: #fff; padding-left: 10px; letter-spacing: 1px; background-color: #333; padding: 5px 10px; border-radius: 5px;">Admin Panel</span>
-           
+
             <div class="close-sidebar" data-toggle="left-sidebar-close" style="cursor: pointer; margin-left: 20px;">
                 <i class="ion-close-round" style="font-size: 30px; color: #fff;"></i>
             </div>
         </div>
-        
+
 
         <div class="menu-block customscroll">
             <div class="sidebar-menu">
@@ -324,6 +324,9 @@
                         </a>
                         <ul class="submenu">
                             <li><a href="{{ route('items.index') }}">items Tables</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('lenders.index') }}">items Tables</a></li>
                         </ul>
                     </li>
                 </ul>

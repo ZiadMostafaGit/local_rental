@@ -16,7 +16,7 @@ class LenderController extends Controller
      */
     public function index()
     {
-        //
+       //
     }
 
     /**
@@ -62,7 +62,7 @@ class LenderController extends Controller
  }
  public function showRequests()
 {
-    $lenderId = 13; 
+    $lenderId = 8;
 
 $requests = Rent::where('rental_status', 'pending')
                 ->whereHas('item', function ($query) use ($lenderId) {
