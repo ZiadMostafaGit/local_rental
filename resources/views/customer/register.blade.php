@@ -1,8 +1,5 @@
-<!-- resources/views/customer/register.blade.php -->
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,7 +14,6 @@
             height: 100vh;
             margin: 0;
         }
-
         .container {
             background-color: #fff;
             padding: 30px;
@@ -26,31 +22,24 @@
             width: 100%;
             max-width: 400px;
         }
-
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 20px;
         }
-
         .error-message {
             color: red;
             margin-bottom: 20px;
             font-size: 0.9rem;
         }
-
         .error-message ul {
             margin: 0;
             padding: 0;
         }
-
         .error-message li {
             list-style: none;
         }
-
-        input,
-        select,
-        button {
+        input, select, button {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -59,14 +48,10 @@
             font-size: 1rem;
             box-sizing: border-box;
         }
-
-        input:focus,
-        select:focus,
-        button:focus {
+        input:focus, select:focus, button:focus {
             border-color: #4CAF50;
             outline: none;
         }
-
         button {
             background-color: #4CAF50;
             color: white;
@@ -74,103 +59,70 @@
             border: none;
             font-size: 1.1rem;
         }
-
         button:hover {
             background-color: #45a049;
         }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            font-size: 1rem;
-            margin-bottom: 5px;
-            display: block;
-        }
-
         p {
             text-align: center;
             font-size: 0.9rem;
         }
-
         a {
             color: #4CAF50;
             text-decoration: none;
         }
-
         a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
-
 <body>
 
-    <div class="container">
-        <h2>Customer Registration</h2>
+<div class="container">
+    <h2>Customer Registration</h2>
 
-        @if ($errors->any())
-            <div class="error-message">
-                <ul>
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
+    @if ($errors->any())
+        <div class="error-message">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
-        <form method="POST" action="{{ route('customer.register') }}">
-            @csrf
-            <div class="form-group">
-                <input name="first_name" placeholder="First Name" value="{{ old('first_name') }}">
-            </div>
+    <form method="POST" action="{{ route('customer.register') }}">
+        @csrf
 
-            <div class="form-group">
-                <input name="last_name" placeholder="Last Name" value="{{ old('last_name') }}">
-            </div>
+        <input name="first_name" placeholder="First Name" value="{{ old('first_name') }}">
 
-            <div class="form-group">
-                <input name="email" type="email" placeholder="Email" value="{{ old('email') }}">
-            </div>
+        <input name="last_name" placeholder="Last Name" value="{{ old('last_name') }}">
 
-            <div class="form-group">
-                <input name="password" type="password" placeholder="Password">
-            </div>
+        <input name="email" type="email" placeholder="Email" value="{{ old('email') }}">
 
-            <div class="form-group">
-                <select name="gender" required>
-                    <option value="">Select Gender</option>
-                    <option value="M" {{ old('gender') == 'M' ? 'selected' : '' }}>Male</option>
-                    <option value="F" {{ old('gender') == 'F' ? 'selected' : '' }}>Female</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <input name="state" placeholder="State" value="{{ old('state') }}">
-            </div>
+        <input name="password" type="password" placeholder="Password">
+        <input name="password_confirmation" type="password" placeholder="Confirm Password">
 
-            <div class="form-group">
-                <input name="city" placeholder="City" value="{{ old('city') }}">
-            </div>
+        <select name="gender">
+            <option value="">Select Gender</option>
+            <option value="M" {{ old('gender') == 'M' ? 'selected' : '' }}>Male</option>
+            <option value="F" {{ old('gender') == 'F' ? 'selected' : '' }}>Female</option>
+        </select>
 
-            <div class="form-group">
-                <input name="street" placeholder="Street" value="{{ old('street') }}">
-            </div>
+        <input name="score" type="number" placeholder="Score" value="{{ old('score') }}">
 
-            <div class="form-group">
-                <label for="phone_numbers[]">Phone Numbers:</label>
-                <input type="text" name="phone_numbers[]" placeholder="Phone Number 1"
-                    value="{{ old('phone_numbers.0') }}">
-                <input type="text" name="phone_numbers[]" placeholder="Phone Number 2 (optional)"
-                    value="{{ old('phone_numbers.1') }}">
-            </div>
+        <input name="state" placeholder="State" value="{{ old('state') }}">
+        <input name="city" placeholder="City" value="{{ old('city') }}">
+        <input name="street" placeholder="Street" value="{{ old('street') }}">
 
-            <button type="submit">Register</button>
-        </form>
+        <label for="phone_numbers[]">Phone Numbers:</label>
+        <input type="text" name="phone_numbers[]" placeholder="Phone Number 1" value="{{ old('phone_numbers.0') }}">
+        <input type="text" name="phone_numbers[]" placeholder="Phone Number 2 (optional)" value="{{ old('phone_numbers.1') }}">
 
-        <p>Already have an account? <a href="{{ route('customer.login') }}">Login here</a></p>
-    </div>
+        <button type="submit">Register</button>
+    </form>
+
+    <p>Already have an account? <a href="{{ route('customer.login') }}">Login here</a></p>
+</div>
 
 </body>
-
 </html>

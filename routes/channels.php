@@ -19,3 +19,10 @@ use Illuminate\Support\Facades\Broadcast;
 Broadcast::channel('rent-status.{customerId}', function ($user, $customerId) {
     return auth('customer')->check() && $user->id == (int) $customerId;
 });
+
+
+Broadcast::channel('chat.{conversationId}', function ($user, $conversationId) {
+
+    return true; 
+});
+

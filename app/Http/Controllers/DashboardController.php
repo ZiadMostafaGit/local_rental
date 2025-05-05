@@ -67,32 +67,27 @@ class DashboardController extends Controller
         return response()->json($rents);
     }
 
-    public function getReviewsByItemChart(Request $request)
-    {
-        $range = $request->get('range', 'last_week');
-        switch ($range) {
-            case 'last_month':
-                $from = now()->subMonth();
-                break;
-            case 'last_6_month':
-                $from = now()->subMonths(6);
-                break;
-            case 'last_year':
-                $from = now()->subYear();
-                break;
-            default:
-                $from = now()->subWeek();
-        }
+    public function showReport()
+{
+    $customers = Customer::select('first_name', 'score')->get();
 
-        // استعلام للحصول على أعلى تقييم لكل عنصر
-        $reviews = DB::table('reviews')
-            ->join('items', 'reviews.item_id', '=', 'items.id')
-            ->select('items.name as title', DB::raw('max(reviews.rating) as highest_rating'), DB::raw('count(*) as total_reviews'))
-            // إزالة فلتر التواريخ لأنك لا تستخدم عمود تاريخ
-            ->groupBy('items.id')
-            ->orderBy('highest_rating', 'desc') // ترتيب العناصر حسب أعلى تقييم
-            ->get();
+    $labels = $customers->pluck('first_name');
+    $scores = $customers->pluck('score');
 
-        return response()->json($reviews);
-    }
+    return response()->json([
+        'labels' => $labels,
+        'scores' => $scores,
+    ]);
+}
+public function getTopRentedItems()
+{
+    $items = Item::withCount('rents')
+                ->having('rents_count', '>', 1) // ⬅️ الشرط المطلوب
+                ->orderByDesc('rents_count')
+                ->take(5)
+                ->get();
+
+    return response()->json($items);
+}
+
 }

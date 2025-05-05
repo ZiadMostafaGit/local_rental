@@ -24,7 +24,7 @@ class RentController extends Controller
             'item_id' => 'required|exists:items,id',
         ]);
 
-        $customerId = 16;
+        $customerId = 17;
 
         // Create rental request with "pending" status
         Rent::create([

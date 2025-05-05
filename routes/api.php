@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\Api\Auth\CustomerController;
 use App\Http\Controllers\Api\Auth\LenderController;
+use App\Http\Controllers\Api\ChatController as ApiChatController;
 use App\Http\Controllers\Api\ItemController;
 use App\Http\Controllers\Api\ItemImageController;
 use App\Http\Controllers\Api\RentController;
+use App\Http\Controllers\ChatController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -56,4 +58,13 @@ Route::middleware('auth:customer')->prefix('rent')->group(function () {
         Route::post('/requests/{id}/reject', [LenderController::class, 'rejectRequest']);
     });
 
+
+
+    Route::middleware('auth:customer,lender')->group(function () {
+        Route::get('/conversations/{id}', [ApiChatController::class, 'show']);
+        Route::post('/conversations/create', [ChatController::class, 'createConversation']);
+        Route::post('/conversations/{id}/messages', [ChatController::class, 'sendMessage']);
+        Route::get('/conversations/{id}/messages', [ChatController::class, 'getMessages']);
+    });
+    
 

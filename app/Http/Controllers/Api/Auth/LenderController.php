@@ -93,9 +93,14 @@ class LenderController extends Controller
         if (!$lender) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        $requests = Rent::where('rental_status', 'pending')->get();
-
+    
+        // الحصول على الطلبات المعلقة التي تخص العناصر التي يمتلكها الـ lender
+        $requests = Rent::where('rental_status', 'pending')
+                        ->whereHas('item', function ($query) use ($lender) {
+                            $query->where('lender_id', $lender->id);
+                        })
+                        ->get();
+    
         return response()->json([
             'pending_requests' => $requests
         ]);

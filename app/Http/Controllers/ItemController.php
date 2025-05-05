@@ -10,10 +10,9 @@ class ItemController extends Controller
 {
     public function show($id)
     {
-        $customerId = 16; // استخدمي auth('customer')->id() في الحالة الفعلية
+        $customerId = 17;
         $item = Item::findOrFail($id);
 
-        // تحقق من وجود طلب "موافق عليه" لهذا العنصر
         $approvedRent = Rent::where('customer_id', $customerId)
         ->where('item_id', $item->id)
         ->where('rental_status', 'approved')
@@ -33,7 +32,6 @@ class ItemController extends Controller
             if ($rejectedRent) {
                 session()->flash('error', 'تم رفض طلب الإيجار لهذا العنصر.');
             } else {
-                // نحذف أي رسائل فلاش قديمة
                 session()->forget(['info', 'approved_rent_id', 'error']);
             }
         }

@@ -1,6 +1,7 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin;
+use App\Http\Controllers\Controller;
 
 use App\Models\Item;
 use App\Models\ItemImage;
@@ -14,14 +15,14 @@ class ItemImageController extends Controller
     /**
      * Show the form for creating a new resource.
      */
-    public function index(Item $item)
-    {
-        // 1. الحصول على الصور المرتبطة بالـ item باستخدام العلاقة
-        $itemImages = $item->images;  // assuming you have a relationship 'images' defined on the Item model
-
-        // 2. تمرير الصور إلى الواجهة
-        return view('item', compact('item', 'itemImages'));
-    }
+   
+        public function index(Item $item)
+        {
+            $itemImages = $item->images;
+            return view('admin_dashboard.pages.items.item_image', compact('item','itemImages'));
+        }
+    
+    
 
 
 

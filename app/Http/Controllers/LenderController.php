@@ -62,7 +62,14 @@ class LenderController extends Controller
  }
  public function showRequests()
 {
-    $requests = Rent::where('rental_status', 'pending')->get();
+    $lenderId = 13; 
+
+$requests = Rent::where('rental_status', 'pending')
+                ->whereHas('item', function ($query) use ($lenderId) {
+                    $query->where('lender_id', $lenderId);
+                })
+                ->get();
+
 
     return view('lender.dashboard', compact('requests'));
 }

@@ -105,45 +105,23 @@
                     </div>
                 </div>
 
-                <div class="mb-20 col-md-4">
-                    <div class="card-box min-height-200px pd-20" data-bgcolor="#455a64">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="text-white h5 mb-md-0">Reviews by Item</div>
-                            <div class="form-group mb-md-0">
-                                <select id="reviewsItemSelect" class="form-control form-control-sm selectpicker">
-                                    <option value="last_week">Last Week</option>
-                                    <option value="last_month">Last Month</option>
-                                    <option value="last_6_month">Last 6 Months</option>
-                                    <option value="last_year">Last 1 Year</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                
-                    <div class="card-box height-100-p pd-20">
-                        <canvas id="reviewsItemChart"></canvas>
-                    </div>
-                </div>
-                
+
+
             </div>
-            
+
         </div>
         </div>
         <div class="row">
             <div class="mb-20 col-lg-4 col-md-6">
                 <div class="card-box height-100-p pd-20 min-height-200px">
                     <div class="pb-10 d-flex justify-content-between">
-                        <div class="mb-0 h5">Top products</div>
+                        <div class="mb-0 h5">Top itemsRents</div>
                         <div class="dropdown">
                             <a class="p-0 btn btn-link font-24 line-height-1 no-arrow dropdown-toggle"
                                 data-color="#1b3133" href="#" role="button" data-toggle="dropdown">
                                 <i class="dw dw-more"></i>
                             </a>
-                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                                <a class="dropdown-item" href="#"><i class="dw dw-eye"></i> View</a>
-                                <a class="dropdown-item" href="#"><i class="dw dw-edit2"></i> Edit</a>
-                                <a class="dropdown-item" href="#"><i class="dw dw-delete-3"></i> Delete</a>
-                            </div>
+
                         </div>
                     </div>
                     <div class="user-list">
@@ -151,22 +129,16 @@
 
                             <li class="d-flex align-items-center justify-content-between">
                                 <div class="pr-2 name-avatar d-flex align-items-center">
-                                    <div class="flex-shrink-0 mr-2 avatar">
-                                        <img src="#" class="border-radius-100 box-shadow" width="50"
-                                            height="50" alt="">
-                                    </div>
                                     <div class="txt">
                                         <span class="badge badge-pill badge-sm" data-bgcolor="#e7ebf5"
-                                            data-color="#265ed7">4.9</span>
-                                        <div class="font-14 weight-600">hello</div>
+                                            data-color="#265ed7">..</span>
+                                        <div class="font-14 weight-600">..</div>
                                         <div class="font-12 weight-500" data-color="#b2b1b6">
-                                            3000
+                                            ..
                                         </div>
                                     </div>
                                 </div>
-                                <div class="flex-shrink-0 cta">
-                                    <a href="#" class="btn btn-sm btn-outline-primary">addproduct</a>
-                                </div>
+
                             </li>
                         </ul>
                     </div>
@@ -175,14 +147,18 @@
             <div class="mb-20 col-lg-4 col-md-6">
                 <div class="card-box height-100-p pd-20 min-height-200px">
                     <div class="d-flex justify-content-between">
-                        <div class="mb-0 h5">Product Report</div>
+                        <div class="mb-0 h5">Customers Report</div>
                         <div class="dropdown">
 
                         </div>
                     </div>
+
+                    <!-- هنا مكان الـ canvas الصح -->
                     <div>
-                        <canvas id="diseases_chart"></canvas>
+                        <canvas id="diseases_chart" style="width: 100%; height: 300px;"></canvas>
                     </div>
+
+
                 </div>
             </div>
         </div>
@@ -313,82 +289,79 @@
         loadAdminChart();
     });
 
-    // Initial chart load
-    loadAdminChart();
 </script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        let reviewsItemChart;
+    document.addEventListener("DOMContentLoaded", function () {
+        fetch("{{ route('customer.chart.score') }}") // غيّر المسار لو مختلف
+            .then(response => response.json())
+            .then(chartData => {
+                const ctx = document.getElementById('diseases_chart').getContext('2d');
 
-        function loadReviewsItemChart(range = 'last_week') {
-            fetch(`/admin/reviews/item/chart?range=${range}`)
-                .then(res => res.json())
-                .then(data => {
-                    const labels = data.map(d => d.title); // Names of the items
-                    const values = data.map(d => d.highest_rating); // Highest ratings
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: chartData.labels,
+                        datasets: [{
+                            label: 'Customer Scores',
+                            data: chartData.scores,
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.7)',
+                                'rgba(54, 162, 235, 0.7)',
+                                'rgba(255, 206, 86, 0.7)',
+                                'rgba(75, 192, 192, 0.7)',
+                                'rgba(153, 102, 255, 0.7)',
+                                'rgba(255, 159, 64, 0.7)'
+                            ],
+                            borderColor: 'white',
+                            borderWidth: 2
+                        }]
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error loading chart data:", error);
+            });
+    });
+</script>
 
-                    // If the chart exists, destroy it and reinitialize
-                    if (reviewsItemChart) {
-                        reviewsItemChart.destroy();
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: '/top-rented-items',
+            method: 'GET',
+            success: function (items) {
+                let html = '';
+                items.forEach(item => {
+                    // تحديد لون الـ badge بناءً على عدد الإيجارات
+                    let badgeColor = 'badge-secondary'; // الافتراضي
+                    if (item.rents_count >= 5) {
+                        badgeColor = 'badge-success'; // إذا عدد الإيجارات أكبر من أو يساوي 5
+                    } else if (item.rents_count >= 3) {
+                        badgeColor = 'badge-warning'; // إذا عدد الإيجارات أكبر من أو يساوي 3
                     }
 
-                    const ctx = document.getElementById('reviewsItemChart').getContext('2d');
-                    reviewsItemChart = new Chart(ctx, {
-                        type: 'pie', // Pie chart type
-                        data: {
-                            labels: labels,
-                            datasets: [{
-                                label: 'Reviews Distribution by Item',
-                                data: values,
-                                backgroundColor: [
-                                    'rgba(255, 99, 132, 0.6)',
-                                    'rgba(54, 162, 235, 0.6)',
-                                    'rgba(255, 206, 86, 0.6)',
-                                    'rgba(75, 192, 192, 0.6)',
-                                    'rgba(153, 102, 255, 0.6)',
-                                    'rgba(255, 159, 64, 0.6)',
-                                ],
-                                borderColor: [
-                                    'rgba(255, 99, 132, 1)',
-                                    'rgba(54, 162, 235, 1)',
-                                    'rgba(255, 206, 86, 1)',
-                                    'rgba(75, 192, 192, 1)',
-                                    'rgba(153, 102, 255, 1)',
-                                    'rgba(255, 159, 64, 1)',
-                                ],
-                                borderWidth: 1
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            plugins: {
-                                legend: {
-                                    position: 'top',
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function (tooltipItem) {
-                                            return `${tooltipItem.label}: ${tooltipItem.raw} rating`; // Display the highest rating
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                })
-                .catch(error => console.error('Error loading reviews by item data:', error));
-        }
+                    html += `
+                        <li class="d-flex align-items-center justify-content-between">
+                            <div class="pr-2 name-avatar d-flex align-items-center">
 
-        const selectElement = document.getElementById('reviewsItemSelect');
-        if (selectElement) {
-            selectElement.addEventListener('change', function () {
-                loadReviewsItemChart(this.value);
-            });
-        }
-
-        // Initial chart load
-        loadReviewsItemChart();
+                                <div class="txt">
+                                    <span class="badge ${badgeColor} badge-pill badge-sm">${item.rents_count}</span>
+                                    <div class="font-14 weight-600">${item.title}</div>
+                                    <div class="font-12 weight-500" data-color="#b2b1b6">
+                                        ${item.price} EGP
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+                $('.user-list ul').html(html);
+            },
+            error: function () {
+                console.error('Failed to load top rented items.');
+            }
+        });
     });
 </script>

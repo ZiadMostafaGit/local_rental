@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 class Message extends Model
 {
     use HasFactory;
-    protected $guarded = ['id'];
+    protected $fillable = ['conversation_id', 'message_content', 'sender','created_at'];
+
     public $timestamps = false;
+
+
+    public function conversation()
+{
+    return $this->belongsTo(Conversation::class);
+}
+
 }
