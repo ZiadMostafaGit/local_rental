@@ -17,6 +17,20 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+     public function profile(Request $request)
+     {
+         $customer = Auth::guard('customer')->user();  // استخدام guard الخاص بـ customer
+     
+         if (!$customer) {
+             return response()->json(['error' => 'Unauthorized'], 401);
+         }
+     
+         $customer = Customer::with('phoneNumbers')->find($customer->id);
+     
+         return response()->json($customer);
+     }
+     
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -56,19 +70,21 @@ class CustomerController extends Controller
         $validator = Validator::make($request->all(), [
             'first_name' => 'required|string|max:50',
             'last_name'  => 'required|string|max:50',
-            'gender'     => 'required|in:M,F', 
+            'gender'     => 'required|in:M,F',
             'score'      => 'required|numeric',
             'state'      => 'required|string|max:100',
             'city'       => 'required|string|max:100',
             'street'     => 'required|string|max:100',
             'email'      => 'required|email|unique:customers,email',
             'password'   => 'required|string|min:8',
+            'phone_nums' => 'required|array',     
+            'phone_nums.*' => 'string|unique:customer_phone_num,phone_num', 
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-
+    
         try {
             $customer = Customer::create([
                 'first_name' => $request->first_name,
@@ -81,9 +97,16 @@ class CustomerController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
             ]);
-
+    
+            // إضافة الأرقام إلى قاعدة البيانات
+            foreach ($request->phone_nums as $phone_num) {
+                $customer->phoneNumbers()->create([
+                    'phone_num' => $phone_num,
+                ]);
+            }
+    
             $token = $customer->createToken('customer_token')->plainTextToken;
-
+    
             return response()->json([
                 'status' => 'Register successfully',
                 'token' => $token
@@ -95,6 +118,7 @@ class CustomerController extends Controller
             ], 500);
         }
     }
+    
 
     public function logout(Request $request)
     {

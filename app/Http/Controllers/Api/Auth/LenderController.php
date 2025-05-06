@@ -7,11 +7,25 @@ use App\Models\Lender;
 use App\Models\Rent;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class LenderController extends Controller
 {
+
+    public function profile(Request $request)
+    {
+        $lender = Auth::guard('lender')->user();
+
+        if (!$lender) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $lender = Lender::with('phoneNumbers')->find($lender->id);
+        return response()->json($lender);
+    }
+
     // تسجيل مؤجِّر جديد
     public function register(Request $request)
     {
@@ -25,6 +39,8 @@ class LenderController extends Controller
             'city'       => 'required|string',
             'street'     => 'required|string',
             'score'      => 'required|numeric',
+            'phone_nums' => 'required|array', 
+            'phone_nums.*' => 'string|unique:lender_phone_num,phone_num', 
         ]);
 
         $lender = Lender::create([
@@ -36,15 +52,25 @@ class LenderController extends Controller
             'state'      => $request->state,
             'city'       => $request->city,
             'street'     => $request->street,
-            'score' => $request->score,
+            'score'      => $request->score,
         ]);
+
+        // إضافة الأرقام إلى قاعدة البيانات
+        foreach ($request->phone_nums as $phone_num) {
+            $lender->phoneNumbers()->create([
+                'phone_num' => $phone_num,
+            ]);
+        }
+
         $token = $lender->createToken('lender_token')->plainTextToken;
+
         return response()->json([
             'message' => 'Lender registered successfully.',
             'lender'  => $lender,
             'token'   => $token,
         ], 201);
     }
+
 
     public function login(Request $request)
     {
@@ -93,14 +119,14 @@ class LenderController extends Controller
         if (!$lender) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-    
+
         // الحصول على الطلبات المعلقة التي تخص العناصر التي يمتلكها الـ lender
         $requests = Rent::where('rental_status', 'pending')
-                        ->whereHas('item', function ($query) use ($lender) {
-                            $query->where('lender_id', $lender->id);
-                        })
-                        ->get();
-    
+            ->whereHas('item', function ($query) use ($lender) {
+                $query->where('lender_id', $lender->id);
+            })
+            ->get();
+
         return response()->json([
             'pending_requests' => $requests
         ]);

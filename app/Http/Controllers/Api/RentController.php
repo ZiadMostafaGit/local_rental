@@ -6,12 +6,34 @@ use App\Http\Controllers\Controller;
 use App\Models\Item;
 use App\Models\Rent;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Stripe\Checkout\Session;
 use Stripe\Stripe;
 
 class RentController extends Controller
-{
+{     //customer
+
+    public function rentHistory(Request $request)
+    {
+        $customer = Auth::guard('customer')->user();
+    
+        if (!$customer) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+    
+        $rentals = $customer->rentals()
+            ->with('item')
+            ->latest('rented_time')
+            ->get();
+    
+        return response()->json([
+            'status' => 'success',
+            'rentals' => $rentals
+        ]);
+    }
+    
+
     public function rentRequest(Request $request)
     {
         $request->validate([
@@ -30,8 +52,42 @@ class RentController extends Controller
             'message' => 'Rental request sent successfully.',
             'rent' => $rent->fresh()
         ], 201);
-
     }
+
+
+    public function pendingRequests()
+    {
+        $customerId = auth('customer')->id();
+
+        $pendingRents = Rent::with('item')
+            ->where('customer_id', $customerId)
+            ->where('rental_status', 'pending')
+            ->get();
+
+        return response()->json([
+            'pending_requests' => $pendingRents
+        ]);
+    }
+
+    public function cancelRequest($id)
+    {
+        $customerId = auth('customer')->id();
+
+        $rent = Rent::where('id', $id)
+            ->where('customer_id', $customerId)
+            ->where('rental_status', 'pending')
+            ->firstOrFail();
+
+        $rent->delete();
+
+        return response()->json([
+            'message' => 'Rental request removed successfully.'
+        ]);
+    }
+
+
+
+    //lender
     public function approveRequest($id)
     {
         $rent = Rent::findOrFail($id);
@@ -49,7 +105,7 @@ class RentController extends Controller
 
         return response()->json(['message' => 'Request rejected.', 'rent' => $rent]);
     }
-
+    ////////////////
 
     // إنشاء إيجار جديد
     public function store(Request $request)
@@ -68,9 +124,9 @@ class RentController extends Controller
 
         // البحث عن تأجير سابق تمّت الموافقة عليه
         $rent = Rent::where('customer_id', $customer->id)
-                    ->where('item_id', $request->item_id)
-                    ->where('rental_status', 'approved')
-                    ->first();
+            ->where('item_id', $request->item_id)
+            ->where('rental_status', 'approved')
+            ->first();
 
         // تحقق من التداخل مع حجوزات أخرى لنفس العنصر
         $overlap = Rent::where('item_id', $request->item_id)
@@ -79,11 +135,11 @@ class RentController extends Controller
             })
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
-                      ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
-                      ->orWhere(function ($q) use ($request) {
-                          $q->where('start_date', '<=', $request->start_date)
+                    ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
+                    ->orWhere(function ($q) use ($request) {
+                        $q->where('start_date', '<=', $request->start_date)
                             ->where('end_date', '>=', $request->end_date);
-                      });
+                    });
             })
             ->exists();
 
@@ -210,12 +266,6 @@ class RentController extends Controller
         $rental->save();
 
         $item = $rental->item;
-        $lender = $item->lender; //
-
-        if ($lender) {
-            $lender->increment('score', 10);
-        }
-
         $customer = $rental->customer;
         if ($customer) {
             $customer->incrementScore();
@@ -225,7 +275,6 @@ class RentController extends Controller
             'message' => 'Payment successful, score updated',
             'rental' => $rental,
             'score' => $customer->score ?? 0,
-            'score' => $lender->score ?? 0,
         ]);
     }
 

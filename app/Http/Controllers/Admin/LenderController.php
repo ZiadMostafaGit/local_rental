@@ -15,7 +15,7 @@ class LenderController extends Controller
     public function index()
     {
         $lenders = Lender::all();
-        return view('admin_dashboard.pages.items.lenders.index', compact('lenders'));
+        return view('admin_dashboard.pages.lenders.index', compact('lenders'));
     }
 
     /**
@@ -72,7 +72,7 @@ class LenderController extends Controller
     {
         $items = Item::where('item_status', 'pending')->with('lender')->get();
 
-        return  view('admin_dashboard.pages.items.lenders.pending', compact('items'));
+        return  view('admin_dashboard.pages.lenders.pending', compact('items'));
     }
 
     // الموافقة على عنصر

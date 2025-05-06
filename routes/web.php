@@ -7,7 +7,6 @@ use App\Http\Controllers\Admin\LenderController as AdminLenderController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\ItemController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\LenderController;
@@ -40,13 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/customer/register', [CustomerController::class, 'showRegistrationForm'])->name('customer.register.form');
-Route::post('/customer/register', [CustomerController::class, 'register'])->name('customer.register');
-// عرض صفحة تسجيل الدخول
-Route::get('/customer/login', [CustomerController::class, 'showLoginForm'])->name('customer.login');
 
-// تنفيذ تسجيل الدخول
-Route::post('/customer/login', [CustomerController::class, 'login'])->name('customer.doLogin');
 
 
 
@@ -55,7 +48,6 @@ Route::post('/customer/login', [CustomerController::class, 'login'])->name('cust
 
 
 Route::get('/admin/dashboard', [DashboardController::class, 'index']);
-Route::get('/item/{id}', [ItemController::class, 'show'])->name('item.show');
 
 Route::post('/rents/request', [RentController::class, 'rentrequest'])->name('rent.request');
 Route::get('/lender/requests', [LenderController::class, 'showRequests'])->name('lender.requests');

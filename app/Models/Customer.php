@@ -61,8 +61,16 @@ public function items()
 }
 public function incrementScore($amount = 10)
 {
-    // زيادة الـ score بمقدار معين، يمكن أن يكون القيمة الافتراضية 10
     $this->increment('score', $amount);
+}
+
+public function review(){
+    return $this->hasMany(Review::class);
+}
+
+public function rentals()
+{
+    return $this->hasMany(Rent::class); 
 }
 
 }

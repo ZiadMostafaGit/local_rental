@@ -323,10 +323,10 @@
                             <span class="micon bi bi-table"></span><span class="mtext">Tables</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="{{ route('items.index') }}">items Tables</a></li>
+                            <li><a href="{{ route('items.index') }}">items Table</a></li>
                         </ul>
                         <ul class="submenu">
-                            <li><a href="{{ route('lenders.index') }}">items Tables</a></li>
+                            <li><a href="{{ route('lenders.index') }}">lenders Table</a></li>
                         </ul>
                     </li>
                 </ul>
