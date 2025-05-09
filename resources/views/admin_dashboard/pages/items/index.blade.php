@@ -6,8 +6,8 @@
         <h1 class="mb-4">Items Table</h1>
 
         <!-- Table -->
-        <table class="table table-striped table-bordered">
-            <thead>
+        <table class="table table-striped table-bordered align-middle">
+            <thead class="table-dark text-center">
                 <tr>
                     <th>Title</th>
                     <th>Description</th>
@@ -24,7 +24,7 @@
                     <tr>
                         <td>{{ $item->title }}</td>
                         <td>{{ Str::limit($item->description, 50) }}</td> <!-- Limit text for description -->
-                        <td>{{ $item->price }}$</td> <!-- Display price with a currency symbol -->
+                        <td>${{ $item->price }}</td> <!-- Display price with a currency symbol -->
                         <td>
                             <span class="badge {{ $item->item_status == 'available' ? 'bg-success' : 'bg-danger' }}">
                                 {{ ucfirst($item->item_status) }}
@@ -39,19 +39,17 @@
                         <td>
                             <!-- Show Images -->
                             @foreach ($item->images as $image)
-                                <img src="{{ asset('storage/item_images/' . $image->id . '.png')}}" class="img-thumbnail" width="50" height="50">
+                                <img src="{{ asset('storage/item_images/' . $image->id . '.png') }}" class="img-thumbnail" width="50" height="50" alt="Image">
                             @endforeach
                         </td>
 
-                        <td class="d-flex align-items-center">
+                        <td class="text-center">
                             <!-- Edit Button -->
                             <a href="{{ route('items.edit', $item->id) }}" class="btn btn-sm btn-warning me-2">
                                 <i class="fas fa-edit"></i> Edit
                             </a>
-                        </td>
 
-                        <!-- Delete Button -->
-                        <td class="d-flex align-items-center">
+                            <!-- Delete Button -->
                             <form action="{{ route('items.destroy', $item->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?')" style="display:inline-block;">
                                 @csrf
                                 @method('DELETE')
@@ -59,10 +57,8 @@
                                     <i class="fas fa-trash"></i> Delete
                                 </button>
                             </form>
-                        </td>
 
-                        <!-- Add to Category Button -->
-                        <td class="d-flex align-items-center">
+                            <!-- Add to Category Button -->
                             <form action="{{ route('items.addCategory', $item->id) }}" method="POST" style="display:inline-block;">
                                 @csrf
                                 <select name="category_id" onchange="this.form.submit()" class="form-select form-select-sm ms-2">
@@ -74,11 +70,9 @@
                                     @endforeach
                                 </select>
                             </form>
-                        </td>
 
-                        <!-- Add Images Button -->
-                        <td class="d-flex align-items-center">
-                            <a href="{{ route('item.images.index', $item->id) }}" class="btn btn-sm btn-primary">
+                            <!-- Add Images Button -->
+                            <a href="{{ route('item.images.index', $item->id) }}" class="btn btn-sm btn-primary ms-2">
                                 <i class="fas fa-image"></i> Add Image
                             </a>
                         </td>

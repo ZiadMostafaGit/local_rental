@@ -107,32 +107,34 @@ class RentController extends Controller
     }
     ////////////////
 
-    // إنشاء إيجار جديد
     public function store(Request $request)
     {
-        $request->validate([
-            'item_id' => 'required|exists:items,id',
-            'start_date' => 'required|date|after_or_equal:' . today()->toDateString(),
-            'end_date' => 'required|date|after_or_equal:start_date',
-            'delivery_address' => 'required|string|max:100',
-        ]);
-
+        try {
+            $request->validate([
+                'item_id' => 'required|exists:items,id',
+                'start_date' => 'required|date|after_or_equal:' . now()->toDateString(),
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'delivery_address' => 'required|string|max:100',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+    
         $customer = auth('customer')->user();
         if (!$customer) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
-
-        // البحث عن تأجير سابق تمّت الموافقة عليه
+    
         $rent = Rent::where('customer_id', $customer->id)
             ->where('item_id', $request->item_id)
             ->where('rental_status', 'approved')
             ->first();
-
-        // تحقق من التداخل مع حجوزات أخرى لنفس العنصر
+    
         $overlap = Rent::where('item_id', $request->item_id)
-            ->when($rent, function ($query) use ($rent) {
-                return $query->where('id', '!=', $rent->id); // استثناء الحجز الحالي إن وجد
-            })
+            ->when($rent, fn($query) => $query->where('id', '!=', $rent->id))
             ->where(function ($query) use ($request) {
                 $query->whereBetween('start_date', [$request->start_date, $request->end_date])
                     ->orWhereBetween('end_date', [$request->start_date, $request->end_date])
@@ -142,46 +144,42 @@ class RentController extends Controller
                     });
             })
             ->exists();
-
+    
         if ($overlap) {
             return response()->json(['error' => 'The item is already rented during this period.'], 422);
         }
-
+    
         if ($rent) {
-            // تحديث بيانات الإيجار
             $rent->update([
                 'start_date' => $request->start_date,
                 'end_date' => $request->end_date,
                 'delivery_address' => $request->delivery_address,
                 'rental_status' => 'in_progress',
             ]);
-
-            // تحديث حالة العنصر
-            $item = Item::findOrFail($request->item_id);
-            $item->update(['item_status' => 'unavailable']);
-
+    
+            Item::findOrFail($request->item_id)->update(['item_status' => 'unavailable']);
+    
             return response()->json([
                 'message' => 'Rent updated successfully',
                 'rent' => $rent,
             ], 200);
-        } else {
-            // إنشاء سجل جديد
-            $rent = Rent::create([
-                'customer_id' => $customer->id,
-                'item_id' => $request->item_id,
-                'start_date' => $request->start_date,
-                'end_date' => $request->end_date,
-                'delivery_address' => $request->delivery_address,
-                'rental_status' => 'pending',
-            ]);
-
-            return response()->json([
-                'message' => 'Rent created successfully',
-                'rent' => $rent,
-            ], 201);
         }
+    
+        $rent = Rent::create([
+            'customer_id' => $customer->id,
+            'item_id' => $request->item_id,
+            'start_date' => $request->start_date,
+            'end_date' => $request->end_date,
+            'delivery_address' => $request->delivery_address,
+            'rental_status' => 'pending',
+        ]);
+    
+        return response()->json([
+            'message' => 'Rent created successfully',
+            'rent' => $rent,
+        ], 201);
     }
-
+    
 
 
     // حساب المبلغ المستحق

@@ -30,7 +30,6 @@
                 <option value="available">Available</option>
                 <option value="unavailable">Unavailable</option>
                 <option value="pending">Pending</option>
-                <option value="rejected">Rejected</option>
             </select>
         </div>
 

@@ -100,73 +100,34 @@
                         <i class="icon-copy dw dw-notification"></i>
                         <span class="badge notification-active"></span>
                     </a>
+                    <!-- dropdown section in your Blade -->
                     <div class="dropdown-menu dropdown-menu-right">
                         <div class="notification-list mx-h-350 customscroll">
-                            <ul>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/img.jpg" alt="" />
-                                        <h3>John Doe</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/photo1.jpg" alt="" />
-                                        <h3>Lea R. Frith</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/photo2.jpg" alt="" />
-                                        <h3>Erik L. Richards</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/photo3.jpg" alt="" />
-                                        <h3>John Doe</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/photo4.jpg" alt="" />
-                                        <h3>Renee I. Hansen</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href="#">
-                                        <img src="/back/vendors/images/img.jpg" alt="" />
-                                        <h3>Vicki M. Coleman</h3>
-                                        <p>
-                                            Lorem ipsum dolor sit amet, consectetur adipisicing
-                                            elit, sed...
-                                        </p>
-                                    </a>
-                                </li>
+                            <ul class="list-unstyled">
+                                @forelse($topReviews as $review)
+                                    <li class="d-flex align-items-center p-2 border-bottom">
+                                        <img src="https://ui-avatars.com/api/?name={{ urlencode($review->customer->first_name . ' ' . $review->customer->last_name) }}&background=0D8ABC&color=fff"
+                                            alt="Avatar" class="rounded-circle mr-2" width="40" height="40">
+                                        <div class="ml-2">
+                                            <h6 class="mb-1">{{ $review->customer->first_name }}
+                                                {{ $review->customer->last_name }}</h6>
+                                            <p class="mb-0 text-muted" style="font-size: 13px;">
+                                                ⭐ {{ $review->rating }} - {{ Str::limit($review->comment, 50) }}
+                                            </p>
+                                        </div>
+                                    </li>
+                                @empty
+                                    <li>
+                                        <p class="text-center text-muted p-2">No reviews yet.</p>
+                                    </li>
+                                @endforelse
                             </ul>
                         </div>
                     </div>
+
+
                 </div>
+
             </div>
             <div class="user-info-dropdown">
                 <div class="dropdown">
@@ -177,8 +138,8 @@
                         <span class="user-name">{{ Auth::user()->name }}</span>
                     </a>
                     <div class="dropdown-menu dropdown-menu-right dropdown-menu-icon-list">
-                        <a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="dw dw-user1"></i>
-                            {{ __('Profile') }}</a>
+                       {{--  <a class="dropdown-item" href="{{ route('profile.edit') }}"><i class="dw dw-user1"></i>
+                            {{ __('Profile') }}</a> --}}
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <a class="dropdown-item" href="{{ route('logout') }}"
@@ -291,7 +252,9 @@
     <div class="left-side-bar">
         <div class="brand-logo">
 
-            <span class="dark-logo" style="font-size: 24px; font-weight: bold; color: #fff; padding-left: 10px; letter-spacing: 1px; background-color: #333; padding: 5px 10px; border-radius: 5px;">Admin Panel</span>
+            <span class="dark-logo"
+                style="font-size: 24px; font-weight: bold; color: #fff; padding-left: 10px; letter-spacing: 1px; background-color: #333; padding: 5px 10px; border-radius: 5px;">Admin
+                Panel</span>
 
             <div class="close-sidebar" data-toggle="left-sidebar-close" style="cursor: pointer; margin-left: 20px;">
                 <i class="ion-close-round" style="font-size: 30px; color: #fff;"></i>
@@ -307,7 +270,7 @@
                             <span class="micon bi bi-house"></span><span class="mtext">Home</span>
                         </a>
                         <ul class="submenu">
-                            <li><a href="index.html">Dashboard style 1</a></li>
+                            <li><a href="{{ route('dashboard') }}">Dashboard</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -316,6 +279,21 @@
                         </a>
                         <ul class="submenu">
                             <li><a href="{{ route('items.create') }}">Form Item</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('lenders.create') }}">Form Lender</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('categories.create') }}">Form Category</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('customers.create') }}">Form Customer</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('reviews.create') }}">Form Review</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('rental.create') }}">Form Rental</a></li>
                         </ul>
                     </li>
                     <li class="dropdown">
@@ -327,6 +305,18 @@
                         </ul>
                         <ul class="submenu">
                             <li><a href="{{ route('lenders.index') }}">lenders Table</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('categories.index') }}">Category Table</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('customers.index') }}">Customer Table</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('reviews.index') }}">Reviews Table</a></li>
+                        </ul>
+                        <ul class="submenu">
+                            <li><a href="{{ route('rental.index') }}">Rent Table</a></li>
                         </ul>
                     </li>
                 </ul>

@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ItemController extends Controller
 {
+
+    public function category(Request $request)
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
     public function index(Request $request)
     {
         $query = Item::with(['categories', 'images']);
@@ -26,7 +32,7 @@ class ItemController extends Controller
             $query->where('title', 'like', '%' . $request->input('search') . '%');
         }
 
-        $items = $query->paginate(10);
+        $items = $query->get();
 
         return response()->json($items);
     }
@@ -100,97 +106,96 @@ class ItemController extends Controller
     }
 
     public function update(Request $request, $id)
-{
-    $validated = $request->validate([
-        'title' => 'sometimes|required|string|max:50',
-        'description' => 'nullable|string',
-        'price' => 'sometimes|required|numeric|min:0',
-        'category_ids' => 'sometimes|required|array',
-        'category_ids.*' => 'exists:categories,id',
-        'images' => 'nullable|array',
-        'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
-    ]);
+    {
+        $validated = $request->validate([
+            'title' => 'sometimes|required|string|max:50',
+            'description' => 'nullable|string',
+            'price' => 'sometimes|required|numeric|min:0',
+            'category_ids' => 'sometimes|required|array',
+            'category_ids.*' => 'exists:categories,id',
+            'images' => 'nullable|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
 
-    // تسجيل بيانات الدخول للمستخدم (lender)
-    $lender = auth('lender')->user();
+        // تسجيل بيانات الدخول للمستخدم (lender)
+        $lender = auth('lender')->user();
 
-    // البحث عن العنصر بناءً على الـ id و الـ lender_id و الـ item_status
-    $item = Item::where('id', $id)
-                ->where('lender_id', $lender->id)
-                ->where('item_status', 'available')
-                ->first();
+        // البحث عن العنصر بناءً على الـ id و الـ lender_id و الـ item_status
+        $item = Item::where('id', $id)
+            ->where('lender_id', $lender->id)
+            ->where('item_status', 'available')
+            ->first();
 
-    if (!$item) {
-        return response()->json(['error' => 'Item not found or not editable'], 404);
-    }
-
-    // تخزين البيانات المعدلة فقط إذا كانت موجودة في الطلب
-    $updateData = [];
-
-    if (isset($validated['title'])) {
-        $updateData['title'] = $validated['title'];
-    }
-
-    if (array_key_exists('description', $validated)) {
-        $updateData['description'] = $validated['description'];
-    }
-
-    if (isset($validated['price'])) {
-        $updateData['price'] = $validated['price'];
-    }
-
-    // تحديث العنصر
-    $item->update($updateData);
-
-    // تحديث الفئات
-    if (isset($validated['category_ids'])) {
-        $item->categories()->sync($validated['category_ids']);
-    }
-
-    // التعامل مع الصور
-    if ($request->hasFile('images')) {
-        foreach ($request->file('images') as $uploadedImage) {
-            $itemImage = ItemImage::create([
-                'item_id' => $item->id,
-            ]);
-
-            $filename = $itemImage->id . '.png';
-            $img = imagecreatefromstring(file_get_contents($uploadedImage));
-            imagepng($img, storage_path('app/public/item_images/' . $filename));
-            imagedestroy($img);
+        if (!$item) {
+            return response()->json(['error' => 'Item not found or not editable'], 404);
         }
+
+        // تخزين البيانات المعدلة فقط إذا كانت موجودة في الطلب
+        $updateData = [];
+
+        if (isset($validated['title'])) {
+            $updateData['title'] = $validated['title'];
+        }
+
+        if (array_key_exists('description', $validated)) {
+            $updateData['description'] = $validated['description'];
+        }
+
+        if (isset($validated['price'])) {
+            $updateData['price'] = $validated['price'];
+        }
+
+        // تحديث العنصر
+        $item->update($updateData);
+
+        // تحديث الفئات
+        if (isset($validated['category_ids'])) {
+            $item->categories()->sync($validated['category_ids']);
+        }
+
+        // التعامل مع الصور
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $uploadedImage) {
+                $itemImage = ItemImage::create([
+                    'item_id' => $item->id,
+                ]);
+
+                $filename = $itemImage->id . '.png';
+                $img = imagecreatefromstring(file_get_contents($uploadedImage));
+                imagepng($img, storage_path('app/public/item_images/' . $filename));
+                imagedestroy($img);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Item updated successfully.',
+            'item' => $item,
+        ]);
     }
 
-    return response()->json([
-        'message' => 'Item updated successfully.',
-        'item' => $item,
-    ]);
-}
 
 
+    public function destroy($id)
+    {
+        $lender = auth('lender')->user();
 
-public function destroy($id)
-{
-    $lender = auth('lender')->user();
+        $item = Item::where('id', $id)
+            ->where('lender_id', $lender->id)
+            ->where('item_status', 'available')
+            ->first();
 
-    $item = Item::where('id', $id)
-                ->where('lender_id', $lender->id)
-                ->where('item_status', 'available')
-                ->first();
+        if (!$item) {
+            return response()->json(['error' => 'Item not found or cannot be deleted'], 404);
+        }
 
-    if (!$item) {
-        return response()->json(['error' => 'Item not found or cannot be deleted'], 404);
+        $images = ItemImage::where('item_id', $item->id)->get();
+        foreach ($images as $image) {
+            Storage::delete('public/item_images/' . $image->id . '.png');
+            $image->delete();
+        }
+
+        $item->delete();
+
+        return response()->json(['message' => 'Item deleted successfully']);
     }
-
-    $images = ItemImage::where('item_id', $item->id)->get();
-    foreach ($images as $image) {
-        Storage::delete('public/item_images/' . $image->id . '.png');
-        $image->delete();
-    }
-
-    $item->delete();
-
-    return response()->json(['message' => 'Item deleted successfully']);
-}
-
 }

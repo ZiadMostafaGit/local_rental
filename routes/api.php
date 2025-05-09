@@ -40,7 +40,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/items/{id}', [ItemController::class, 'show']);
 Route::get('/items', [ItemController::class, 'index']);
-
+Route::get('/categories', [ItemController::class, 'category']);
 
 Route::middleware('auth:customer')->prefix('rent')->group(function () {
     Route::post('/request', [RentController::class, 'rentRequest']);
@@ -69,6 +69,8 @@ Route::middleware('auth:lender')->group(function () {
     Route::put('items/{id}', [ItemController::class, 'update']);
     Route::delete('items/{id}', [ItemController::class, 'destroy']);
     Route::get('/lender/profile', [LenderController::class, 'profile']);
+    Route::get('/lender/items', [LenderController::class, 'lender_items']);
+
 });
 
 

@@ -24,7 +24,7 @@ class ItemController extends Controller
      */
     public function create()
     {
-        $categories = Category::all(); 
+        $categories = Category::all();
         return view('admin_dashboard.pages.items.create', compact('categories'));
     }
 
@@ -45,11 +45,11 @@ class ItemController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'item_status' => $request->item_status,
-            'lender_id' => auth()->guard('lender')->id(), 
+            'lender_id' => auth()->guard('lender')->id(),
         ]);
-        
+
         $item->categories()->attach($request->category_id);
-        
+
 
         return redirect()->route('items.index')->with('success', 'Item created successfully.');
     }
@@ -67,8 +67,10 @@ class ItemController extends Controller
      */
     public function edit(string $id)
     {
-        $categories = Category::all(); 
-        return view('items.edit', compact('item', 'categories'));
+        $item = Item::with('categories')->findOrFail($id);
+    $categories = Category::all();
+
+    return view('admin_dashboard.pages.items.edit', compact('item', 'categories'));
     }
 
     /**

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Item;
 use App\Models\Lender;
 use App\Models\Rent;
 use Exception;
@@ -13,6 +14,15 @@ use Illuminate\Support\Facades\Validator;
 
 class LenderController extends Controller
 {
+
+    public function lender_items()
+   {
+    $lenderId = auth()->id();
+    $items = Item::where('lender_id', $lenderId)->get();
+
+    return response()->json($items);
+   }
+
 
     public function profile(Request $request)
     {
@@ -39,8 +49,8 @@ class LenderController extends Controller
             'city'       => 'required|string',
             'street'     => 'required|string',
             'score'      => 'required|numeric',
-            'phone_nums' => 'required|array', 
-            'phone_nums.*' => 'string|unique:lender_phone_num,phone_num', 
+            'phone_nums' => 'required|array',
+            'phone_nums.*' => 'string|unique:lender_phone_num,phone_num',
         ]);
 
         $lender = Lender::create([
